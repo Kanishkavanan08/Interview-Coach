@@ -5,12 +5,22 @@ from dotenv import load_dotenv
 from google import genai
 from openai import OpenAI
 
-# Load environment variables
+# Load environment variables (for local testing)
 load_dotenv()
 
+# Bulletproof API Key Loader (Works locally and on Streamlit Cloud)
+try:
+    # Try fetching from Streamlit's cloud secrets first
+    gemini_key = st.secrets["GEMINI_API_KEY"]
+    openai_key = st.secrets["OPENAI_API_KEY"]
+except (FileNotFoundError, KeyError):
+    # Fallback to the local .env file
+    gemini_key = os.getenv("GEMINI_API_KEY")
+    openai_key = os.getenv("OPENAI_API_KEY")
+
 # Configure LLM clients
-gemini_client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
-openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+gemini_client = genai.Client(api_key=gemini_key)
+openai_client = OpenAI(api_key=openai_key)
 
 def extract_text_from_pdf(pdf_file):
     """Extracts plain text from an uploaded PDF file."""
